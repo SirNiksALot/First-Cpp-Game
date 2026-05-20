@@ -28,15 +28,15 @@ void draw_rect_in_pixels(int x0 , int y0 , int x1, int y1 , u32 color) {
 ### Intuition behind initialization of pointer on the vertical axis for drawing rectangle
 
 NOTE : 
-1. The drawing happens by initializing the pointer vertically and drawing/setting pixels that lie on that horizontal line between limits x0 and x1 . Basically,
+1. The drawing happens by initializing the pointer vertically ( with " +  y*render_state.width;  " ) and horizontally ( with " + x0 " )  and drawing/setting pixels that lie on that horizontal line between limits x0 and x1 . Basically,
 the rectangle is drawn by drawing horizontal lines from bottom to top .
 1. we already know that the " + x0 " is to move the pointer into position in the x axis 
 
-This " y*render_state.width; " is there so that the pointer can move up the y axis . 
+This " +  y*render_state.width; " is there so that the pointer can move up the y axis . 
 In order to do that the pointer needs to skip an entire screen width i.e. render_state.width 
 
 
-Illustration : 
+Illustration ( of how to move the pointer up vertically  ) : 
 
 |-|X| | | | | | |
 | |O|-|-|-|-|-|-|
@@ -44,6 +44,8 @@ Illustration :
 x ==> final pointer pos
 O ==> initial pointer pos
 - ==> skipped pixels
+
+The above illustration therefore shows you how we move the pointer up  , to begin drawing the horizontal line above the current one 
 */
 
 float render_scale = 0.01f; // just as a utility to avoid typing floats for x , y , half_size_x and half_size_y 
