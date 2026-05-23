@@ -86,7 +86,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine, i
      HDC hdc = GetDC(hwnd);
 
 
-     Input input;
+     Input input = {};
 
      while (running) {
          // ## input
@@ -97,7 +97,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine, i
          }
 
          MSG msg;
-         while (PeekMessage(&msg,hwnd,0,0,PM_REMOVE)) { // peek message populates message struct with user input 
+         while (PeekMessage(&msg,hwnd,0,0,PM_REMOVE)) { // peek message populates message struct with user input ( while loop because there may be multiple messages ) 
+             /*
+             This while loop gathers all the keypress messages and updates the input.buttons array with the button states . Once all the button states are gathered , 
+             only then then simulation happens ( i.e. the moving of the box ) 
+             */
 
              switch (msg.message) {
                 case WM_KEYUP:      // key pressed ⭐
@@ -132,6 +136,8 @@ input.buttons[b].changed = true; \
              }
             
          }
+
+
          // ## simulate
          simulate_game(&input);
          

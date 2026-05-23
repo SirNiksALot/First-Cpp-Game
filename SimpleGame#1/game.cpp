@@ -14,7 +14,7 @@ void simulate_game(Input* input) {
     //if (pressed(BUTTON_DOWN)) player_pos_y -= 1.f;
     //if (pressed(BUTTON_LEFT)) player_pos_x -= 1.f;
     //if (pressed(BUTTON_RIGHT)) player_pos_x += 1.f;
-    if (is_down(BUTTON_UP)) player_pos_y -= .05f;
+    if (is_down(BUTTON_UP)) player_pos_y += .05f;
     if (is_down(BUTTON_DOWN)) player_pos_y -= .05f;
     if (is_down(BUTTON_LEFT)) player_pos_x -= .05f;
     if (is_down(BUTTON_RIGHT)) player_pos_x += .05f;
