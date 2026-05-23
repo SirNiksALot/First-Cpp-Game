@@ -14,6 +14,8 @@ struct Render_state {
 Render_state render_state;
 
 #include "renderer.cpp" // including the renderer.cpp file here means it has access to the global render_state struct 
+#include "platform_common.cpp"
+#include "game.cpp" // simulation logic 
 
 
 LRESULT CALLBACK window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -84,20 +86,58 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine, i
      HDC hdc = GetDC(hwnd);
 
 
-
+     Input input;
 
      while (running) {
-         //input
-         MSG msg;
-         while (PeekMessage(&msg,hwnd,0,0,PM_REMOVE)) {
-            TranslateMessage(&msg);
-             DispatchMessage(&msg);
+         // ## input
+
+         // this loop resets button's "changed" state for every frame/iteration of game loop before input is checked and changes are made
+         for (int i = 0; i < BUTTON_COUNT; i++) { 
+             input.buttons[i].changed = false; // before checking for key press/release messages it needs to be false by default 
          }
-         //simulate
-         clear_screen(0xff5500);
-         draw_rect(0,0, 20 , 20, 0x00ff22);
+
+         MSG msg;
+         while (PeekMessage(&msg,hwnd,0,0,PM_REMOVE)) { // peek message populates message struct with user input 
+
+             switch (msg.message) {
+                case WM_KEYUP:      // key pressed ⭐
+                case WM_KEYDOWN: {  // key released ⭐
+
+                    u32 vk_code = (u32)msg.wParam;
+                    bool is_down = ((msg.lParam & (1 << 31)) == 0);
+
+
+
+#define process_button(b,vk)\
+case vk: {\
+input.buttons[b].is_down = is_down;\
+input.buttons[b].changed = true; \
+} break;
+
+                    // "input.buttons[b].changed = true;" because the frame / iteration where we receive a message about a keypress, a "change" has occured
+                    switch (vk_code) { 
+                        process_button(BUTTON_UP, VK_UP);
+                        process_button(BUTTON_DOWN, VK_DOWN);
+                        process_button(BUTTON_LEFT, VK_LEFT);
+                        process_button(BUTTON_RIGHT, VK_RIGHT);
+                    }
+
+                }break;
+
+                default: { // no change in key state ⭐
+                    TranslateMessage(&msg);
+                    DispatchMessage(&msg);
+                }
+
+             }
+            
+         }
+         // ## simulate
+         simulate_game(&input);
          
-         //render
+         
+         
+         // ## render
          StretchDIBits(
              hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height,
              render_state.memory, &render_state.bitmapinfo, DIB_RGB_COLORS, SRCCOPY);
