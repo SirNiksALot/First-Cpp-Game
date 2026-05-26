@@ -128,11 +128,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine, i
 
 #define process_button(b,vk)\
 case vk: {\
+input.buttons[b].changed = is_down != input.buttons[b].is_down; \
 input.buttons[b].is_down = is_down;\
-input.buttons[b].changed = true; \
 } break;
 
-                    // "input.buttons[b].changed = true;" because the frame / iteration where we receive a message about a keypress, a "change" has occured
+                    /*
+                    "input.buttons[b].changed = is_down != input.buttons[b].is_down;" 
+                    
+                    because we need to check with previous input buttons state to see if change has occured
+                    
+                    */
+                    
                     switch (vk_code) { 
                         process_button(BUTTON_UP, VK_UP);
                         process_button(BUTTON_DOWN, VK_DOWN);
