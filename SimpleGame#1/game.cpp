@@ -7,17 +7,28 @@ float player_pos_y = 0.f;
 float player_pos_x = 0.f;
 
 
-void simulate_game(Input* input) {
+void simulate_game(Input* input , float dt) {
     
     clear_screen(0xff5500);
     //if (pressed(BUTTON_UP)) player_pos_y +=1.f;
     //if (pressed(BUTTON_DOWN)) player_pos_y -= 1.f;
     //if (pressed(BUTTON_LEFT)) player_pos_x -= 1.f;
     //if (pressed(BUTTON_RIGHT)) player_pos_x += 1.f;
-    if (is_down(BUTTON_UP)) player_pos_y += .05f;
-    if (is_down(BUTTON_DOWN)) player_pos_y -= .05f;
-    if (is_down(BUTTON_LEFT)) player_pos_x -= .05f;
-    if (is_down(BUTTON_RIGHT)) player_pos_x += .05f;
+
+    float speed = 50.f;
+    /*
+    pos += speed  X delta time 
+
+    pos ==>  units per frame 
+    speed ==> units per second 
+    delta time ==> seconds per frame 
+
+    */
+
+    if (is_down(BUTTON_UP)) player_pos_y += speed * dt;
+    if (is_down(BUTTON_DOWN)) player_pos_y -= speed * dt;
+    if (is_down(BUTTON_LEFT)) player_pos_x -= speed * dt;
+    if (is_down(BUTTON_RIGHT)) player_pos_x += speed * dt;
     draw_rect(player_pos_x, player_pos_y, 1, 1, 0x00ff22);
 
 

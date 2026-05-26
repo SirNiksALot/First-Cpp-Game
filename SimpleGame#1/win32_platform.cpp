@@ -88,6 +88,20 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine, i
 
      Input input = {};
 
+     float delta_time = 0.016666f; // just an initialization ( this delta time is basically in terms of seconds per frame version of 60 FPS(Frames per second) ) 
+
+
+     LARGE_INTEGER frame_begin_time; // this is the CPU's couter value i.e. cycle count at the begining of the frame 
+     QueryPerformanceCounter(&frame_begin_time); 
+
+     float performance_frequency; // this will get you the number of cycles per second count of the CPU ( ex : 3.5 GHz ~ 3.5 * 10^9 Cycles per second ) 
+     {
+         LARGE_INTEGER perf;
+         QueryPerformanceFrequency(&perf);
+         performance_frequency = perf.QuadPart;
+     }
+
+
      while (running) {
          // ## input
 
@@ -139,7 +153,7 @@ input.buttons[b].changed = true; \
 
 
          // ## simulate
-         simulate_game(&input);
+         simulate_game(&input,delta_time);
          
          
          
@@ -147,5 +161,23 @@ input.buttons[b].changed = true; \
          StretchDIBits(
              hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height,
              render_state.memory, &render_state.bitmapinfo, DIB_RGB_COLORS, SRCCOPY);
+
+         LARGE_INTEGER frame_end_time; // this is the CPU's couter value i.e. cycle count at the end of the frame 
+         QueryPerformanceCounter(&frame_end_time);
+
+
+         delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart) / performance_frequency;
+         /*
+         Here :
+         delta_time ==> is in seconds unit ( calculated for each frame 
+
+         therefore , 
+         frame_end_time - frame_begin_time ==> gives you the difference ( delta ) in terms of CPU couter value ( cycle counter value ) 
+         We multiply it with performance_frequency to convernt the units from cycles to seconds
+
+         OVERALL : delta_time calcuates the time for each frame ( basically seconds per frame ) 
+         */
+
+         frame_begin_time = frame_end_time; // for next frame's calculations 
      }
 }
