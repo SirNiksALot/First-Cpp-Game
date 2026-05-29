@@ -142,8 +142,8 @@ input.buttons[b].is_down = is_down;\
                     switch (vk_code) { 
                         process_button(BUTTON_UP, VK_UP);
                         process_button(BUTTON_DOWN, VK_DOWN);
-                        process_button(BUTTON_LEFT, VK_LEFT);
-                        process_button(BUTTON_RIGHT, VK_RIGHT);
+                        process_button(BUTTON_W, 'W');
+                        process_button(BUTTON_S, 'S');
                     }
 
                 }break;
@@ -168,6 +168,9 @@ input.buttons[b].is_down = is_down;\
              hdc, 0, 0, render_state.width, render_state.height, 0, 0, render_state.width, render_state.height,
              render_state.memory, &render_state.bitmapinfo, DIB_RGB_COLORS, SRCCOPY);
 
+         
+         
+         
          LARGE_INTEGER frame_end_time; // this is the CPU's couter value i.e. cycle count at the end of the frame 
          QueryPerformanceCounter(&frame_end_time);
 
@@ -175,7 +178,7 @@ input.buttons[b].is_down = is_down;\
          delta_time = (float)(frame_end_time.QuadPart - frame_begin_time.QuadPart) / performance_frequency;
          /*
          Here :
-         delta_time ==> is in seconds unit ( calculated for each frame 
+         delta_time ==> is in seconds unit ( calculated for each frame ) 
 
          therefore , 
          frame_end_time - frame_begin_time ==> gives you the difference ( delta ) in terms of CPU couter value ( cycle counter value ) 
