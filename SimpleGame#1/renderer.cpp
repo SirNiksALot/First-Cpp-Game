@@ -58,7 +58,7 @@ void draw_rect(float x, float y, float half_size_x, float half_size_y , u32 colo
     half_size_x *= render_state.height * render_scale; //  read this as " half_size_x % of height of window will be set as half_size_x " 
     half_size_y *= render_state.height * render_scale; 
 
-    // for centering the rectangle 
+    // for centering the rectangle ( 0,0 will therefore now be the centre of the screen instead of the bottom left corner ) 
     x += render_state.width / 2; 
     y += render_state.height / 2; 
 
@@ -71,6 +71,15 @@ void draw_rect(float x, float y, float half_size_x, float half_size_y , u32 colo
     y ==> centre point y 
     half_size_x ==> half width 
     half_size_y ==> half height 
+
+    Note : Note that the coordinate system we're using here where the centre 0,0 points to the centre of the screen .
+    --------------------------
+    |          |             |
+    |          |             |
+    |----------|-------------|
+    |          |(0,0)        |
+    |          |             |
+    --------------------------
     */
 
 

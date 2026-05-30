@@ -23,8 +23,10 @@ LRESULT CALLBACK window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     switch (uMsg) {
     case WM_CLOSE:
     case WM_DESTROY: {
-        running = false;
+        running = false; // stop game 
     }break; 
+
+    // When the window changes size , we get the size of window to create the render buffer size to draw the pixels in . ( Also run when window is first opened with its initial size ) 
     case WM_SIZE: {
         RECT rect; //created rect struct
 		GetClientRect(hwnd, &rect); // populates rect struct with the dimensions of the client window rectangle 
