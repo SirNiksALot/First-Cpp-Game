@@ -21,6 +21,7 @@ t5 ==> is_down = false and changed = false
 float player_1_p , player_1_dp , player_2_p, player_2_dp;
 float arena_half_size_x = 85, arena_half_size_y = 45; 
 float player_half_size_x = 2.5, player_half_size_y = 12;
+int player_1_score, player_2_score;
 
 float ball_p_x, ball_p_y, ball_dp_x = 100, ball_dp_y = 0 , ball_half_size = 1; 
 
@@ -151,17 +152,23 @@ void simulate_game(Input* input , float dt) {
             ball_p_y = 0;
             ball_dp_x *= -1;
             ball_dp_y = 0;
+            player_2_score++;
         }
         else if (ball_p_x - ball_half_size < -arena_half_size_x) { // collided with left boundary 
             ball_p_x = 0;
             ball_p_y = 0;
             ball_dp_x *= -1;
             ball_dp_y = 0;
+            player_1_score++;
+
         }
     }
 
 
     // ----------------------------------------------------- render rectangles -----------------------------------------------------
+    draw_number(player_2_score, -10, 40, 1.f, 0xbbffbb);
+    draw_number(player_1_score, 10, 40, 1.f, 0xbbffbb);
+
     draw_rect(ball_p_x, ball_p_y, ball_half_size, ball_half_size, 0xffffff); // ball 
     draw_rect(80, player_1_p, 2.5, 12, 0xff0000); // player 1
     draw_rect(-80, player_2_p, 2.5 , 12, 0xff0000); // player 2 
