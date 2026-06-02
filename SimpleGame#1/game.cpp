@@ -23,7 +23,7 @@ float arena_half_size_x = 85, arena_half_size_y = 45;
 float player_half_size_x = 2.5, player_half_size_y = 12;
 int player_1_score, player_2_score;
 
-float ball_p_x, ball_p_y, ball_dp_x = 100, ball_dp_y = 0 , ball_half_size = 1; 
+float ball_p_x, ball_p_y, ball_dp_x = 85, ball_dp_y = 0 , ball_half_size = 1; 
 
 void simulate_player(float* p, float* dp, float ddp, float dt) {
     /*
@@ -74,14 +74,6 @@ void simulate_game(Input* input , float dt) {
     draw_rect(0,0, arena_half_size_x, arena_half_size_y, 0xffaa33);
     
     /*
-    Note : 
-    1. if (pressed(BUTTON_UP)) player_pos_y +=1.f;    ===> this moves the position of the rect when key is pressed only 
-    2. if (is_down(BUTTON_UP)) player_pos_y += speed * dt; ===> this moves the position of the rect when key is pressed and held .
-    PS : refer key state macros to understand the states
-    */
-
-
-    /*
     Variables : 
     1. player_ddp ===> acceleration : der(der(position)) w.r.t time . **This is what we modify with user input**
     2. player_dp ==> velocity : der(position) w.r.t time
@@ -92,8 +84,20 @@ void simulate_game(Input* input , float dt) {
 
     //  ------------------------------------------------------ Simulate player 1 ------------------------------------------------------------
     float player_1_ddp = 0.f;
+    
+#if 0 // to disable the user input below 
     if (is_down(BUTTON_UP)) player_1_ddp += 2000 ;
     if (is_down(BUTTON_DOWN)) player_1_ddp -= 2000 ;
+#else  // AI to play player 1 
+    //if (ball_p_y > player_1_p + .2f) player_1_ddp += 1300;
+    //if (ball_p_y < player_1_p - .2f) player_1_ddp -= 1300;
+
+    // Another approach compared to the above 
+    player_1_ddp = (ball_p_y - player_1_p) * 100; // so that acceleration is directly proportional to how far the ball is to player in y axis . 100 for scaling . 
+    if (player_1_ddp > 1300) player_1_ddp = 1300; // enforcing upper limit for acceleration
+    else if (player_1_ddp < -1300) player_1_ddp = -1300; // enforcing lower limit for acceleration
+
+#endif
 
     simulate_player(&player_1_p, &player_1_dp, player_1_ddp, dt);
 
@@ -165,7 +169,7 @@ void simulate_game(Input* input , float dt) {
     }
 
 
-    // ----------------------------------------------------- render rectangles -----------------------------------------------------
+    // ------------------------------------------------------------ Drawing ----------------------------------------------------------------
     draw_number(player_2_score, -10, 40, 1.f, 0xbbffbb);
     draw_number(player_1_score, 10, 40, 1.f, 0xbbffbb);
 

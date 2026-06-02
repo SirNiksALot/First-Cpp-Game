@@ -104,8 +104,13 @@ void draw_number(int number, float x, float y, float size, u32 color) {
 
 	float half_size = size * .5f;
 
-	bool drew_number = false;
-	while (number || !drew_number) {
+	bool drew_number = false; 
+	/*
+	we use this bool to enter the while loop.
+
+	Using only "while(number)" would mean that the score would not be displayed when the score is initially 0 . 
+	*/
+	while (number || !drew_number) { // while loop ends when number becomes 0 
 		drew_number = true;
 
 		int digit = number % 10;
@@ -117,7 +122,7 @@ void draw_number(int number, float x, float y, float size, u32 color) {
 			draw_rect(x + size, y, half_size, 2.5f * size, color);
 			draw_rect(x, y + size * 2.f, half_size, half_size, color);
 			draw_rect(x, y - size * 2.f, half_size, half_size, color);
-			x -= size * 4.f;
+			x -= size * 4.f; // for rendering multiple digits , we must move the x position after current digit is drawn
 		} break;
 
 		case 1: {
