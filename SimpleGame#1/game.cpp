@@ -25,6 +25,15 @@ int player_1_score, player_2_score;
 
 float ball_p_x, ball_p_y, ball_dp_x = 85, ball_dp_y = 0 , ball_half_size = 1; 
 
+enum Gamemode {
+    GM_MENU,
+    GM_GAMEPLAY
+};
+int hot_button;
+bool enemy_is_ai;
+
+Gamemode current_gamemode;
+
 void simulate_player(float* p, float* dp, float ddp, float dt) {
     /*
     *dp is basically player_dp which is speed/velocity
@@ -70,113 +79,144 @@ bool aabb_vs_aabb(float ball_p_x, float ball_p_y , float player_p_x , float play
 
 void simulate_game(Input* input , float dt) {
     
-    clear_screen(0xff5500);
+    //clear_screen(0xff5500); //causes uncecessary redrawing of pixels in the next step because the next step draws over the current rect to show arena , instead simply render the borders seperately.
     draw_rect(0,0, arena_half_size_x, arena_half_size_y, 0xffaa33);
-    
-    /*
-    Variables : 
-    1. player_ddp ===> acceleration : der(der(position)) w.r.t time . **This is what we modify with user input**
-    2. player_dp ==> velocity : der(position) w.r.t time
-    3. player_p ==> position
+    draw_arena_borders(arena_half_size_x, arena_half_size_y, 0xff5500);
 
-    */
+    if (current_gamemode == GM_GAMEPLAY) {
 
+        /*
+        Variables :
+        1. player_ddp ===> acceleration : der(der(position)) w.r.t time . **This is what we modify with user input**
+        2. player_dp ==> velocity : der(position) w.r.t time
+        3. player_p ==> position
 
-    //  ------------------------------------------------------ Simulate player 1 ------------------------------------------------------------
-    float player_1_ddp = 0.f;
-    
-#if 0 // to disable the user input below 
-    if (is_down(BUTTON_UP)) player_1_ddp += 2000 ;
-    if (is_down(BUTTON_DOWN)) player_1_ddp -= 2000 ;
-#else  // AI to play player 1 
-    //if (ball_p_y > player_1_p + .2f) player_1_ddp += 1300;
-    //if (ball_p_y < player_1_p - .2f) player_1_ddp -= 1300;
-
-    // Another approach compared to the above 
-    player_1_ddp = (ball_p_y - player_1_p) * 100; // so that acceleration is directly proportional to how far the ball is to player in y axis . 100 for scaling . 
-    if (player_1_ddp > 1300) player_1_ddp = 1300; // enforcing upper limit for acceleration
-    else if (player_1_ddp < -1300) player_1_ddp = -1300; // enforcing lower limit for acceleration
-
-#endif
-
-    simulate_player(&player_1_p, &player_1_dp, player_1_ddp, dt);
-
-    //   ------------------------------------------------------- Simulate player 2 -----------------------------------------------------------
-    float player_2_ddp = 0.f;
-    if (is_down(BUTTON_W)) player_2_ddp += 2000;
-    if (is_down(BUTTON_S)) player_2_ddp -= 2000;
-
-    simulate_player(&player_2_p, &player_2_dp, player_2_ddp, dt);
-    
-
-    //   -------------------------------------------------------- Simulate Ball -------------------------------------------------------------
-    {
-
-        ball_p_x += ball_dp_x * dt; // dist  = speed x time then , pos += dist  ( we dont use equations of motion here because no acceleration required , only constant velocity ) 
-        ball_p_y += ball_dp_y * dt;
+        */
 
 
-        // COLLISION # 1 : collision with player 1 . ( Note : 80 is the x pos of centre of player 1 , and player_1_p is the y pos of the centre of player 1 ) 
-        if (aabb_vs_aabb(ball_p_x, ball_p_y, 80, player_1_p)) {
-            ball_p_x = 80 - player_half_size_x - ball_half_size; // set the ball position to the limit ( boundary i.e touching the player ) 
-            ball_dp_x *= -1; // invert x axis velocity to bounce back from the player 
-            ball_dp_y = (ball_p_y - player_1_p) + player_1_dp * 0.75f; // custom physics for better "feel" 
+        //  ------------------------------------------------------ Simulate player 1 ------------------------------------------------------------
+        float player_1_ddp = 0.f;
 
-            /*
+        if (!enemy_is_ai) { 
+            if (is_down(BUTTON_UP)) player_1_ddp += 2000;
+            if (is_down(BUTTON_DOWN)) player_1_ddp -= 2000;
+        }
+        else {  
+            // AI to play player 1 
+           
+            //if (ball_p_y > player_1_p + .2f) player_1_ddp += 1300;
+            //if (ball_p_y < player_1_p - .2f) player_1_ddp -= 1300;
 
-            Explanation for custom physics mechanics : ( ball_p_y - player_1_p ) +  player_1_dp * 0.75f;
+            // Refined approach compared to the above 
+            player_1_ddp = (ball_p_y - player_1_p) * 100; // so that acceleration is directly proportional to how far the ball is to player in y axis . 100 for scaling . 
+            if (player_1_ddp > 1300) player_1_ddp = 1300; // enforcing upper limit for acceleration
+            else if (player_1_ddp < -1300) player_1_ddp = -1300; // enforcing lower limit for acceleration
 
-            1.)  ball_p_y - player_1_p  ==> to give the bal some vertical velocity based on where on the player the ball collided . ( therefore ,
-            if you hit the player in the top half , the ball gets some upward velocity , llly if the ball hits the player in its bottom half it gets some downward velocity )
+        }
 
-            2.)  player_1_dp * 0.75f ==> to give the ball some y axis velocity based on the player's velocity . ( .75 for scaling )
-            */
+        simulate_player(&player_1_p, &player_1_dp, player_1_ddp, dt);
+
+        //   ------------------------------------------------------- Simulate player 2 -----------------------------------------------------------
+        float player_2_ddp = 0.f;
+        if (is_down(BUTTON_W)) player_2_ddp += 2000;
+        if (is_down(BUTTON_S)) player_2_ddp -= 2000;
+
+        simulate_player(&player_2_p, &player_2_dp, player_2_ddp, dt);
+
+
+        //   -------------------------------------------------------- Simulate Ball -------------------------------------------------------------
+        {
+
+            ball_p_x += ball_dp_x * dt; // dist  = speed x time then , pos += dist  ( we dont use equations of motion here because no acceleration required , only constant velocity ) 
+            ball_p_y += ball_dp_y * dt;
+
+
+            // COLLISION # 1 : collision with player 1 . ( Note : 80 is the x pos of centre of player 1 , and player_1_p is the y pos of the centre of player 1 ) 
+            if (aabb_vs_aabb(ball_p_x, ball_p_y, 80, player_1_p)) {
+                ball_p_x = 80 - player_half_size_x - ball_half_size; // set the ball position to the limit ( boundary i.e touching the player ) 
+                ball_dp_x *= -1; // invert x axis velocity to bounce back from the player 
+                ball_dp_y = (ball_p_y - player_1_p) + player_1_dp * 0.75f; // custom physics for better "feel" 
+
+                /*
+
+                Explanation for custom physics mechanics : ( ball_p_y - player_1_p ) +  player_1_dp * 0.75f;
+
+                1.)  ball_p_y - player_1_p  ==> to give the bal some vertical velocity based on where on the player the ball collided . ( therefore ,
+                if you hit the player in the top half , the ball gets some upward velocity , llly if the ball hits the player in its bottom half it gets some downward velocity )
+
+                2.)  player_1_dp * 0.75f ==> to give the ball some y axis velocity based on the player's velocity . ( .75 for scaling )
+                */
+            }
+
+
+            // COLLISION # 2 : collision with player 2 . ( Note : -80 is the x pos of centre of player 1, and player_1_p is the y pos of the centre of player 1)
+            else if (aabb_vs_aabb(ball_p_x, ball_p_y, -80, player_2_p)) {
+                ball_p_x = -80 + player_half_size_x + ball_half_size; // set the ball position to the limit ( boundary i.e touching the player ) 
+                ball_dp_x *= -1; // invert x axis velocity to bounce back from the player 
+                ball_dp_y = player_2_dp * 0.75f; // to give the ball some y axis velocity based on the player's velocity . ( .75 for scaling ) 
+            }
+
+
+            // COLLISION # 3 : collision with arena boundaries 
+            if (ball_p_y + ball_half_size > arena_half_size_y) { // collided with top boundary 
+                ball_p_y = arena_half_size_y - ball_half_size;
+                ball_dp_y *= -1; // invert vertical velocity for reflection effect
+            }
+            else if (ball_p_y - ball_half_size < -arena_half_size_y) { // collided with bottom boundary 
+                ball_p_y = -arena_half_size_y + ball_half_size;
+                ball_dp_y *= -1;
+            }
+            else if (ball_p_x + ball_half_size > arena_half_size_x) { // collided with right boundary 
+                ball_p_x = 0;
+                ball_p_y = 0;
+                ball_dp_x *= -1;
+                ball_dp_y = 0;
+                player_2_score++;
+            }
+            else if (ball_p_x - ball_half_size < -arena_half_size_x) { // collided with left boundary 
+                ball_p_x = 0;
+                ball_p_y = 0;
+                ball_dp_x *= -1;
+                ball_dp_y = 0;
+                player_1_score++;
+
+            }
         }
 
 
-        // COLLISION # 2 : collision with player 2 . ( Note : -80 is the x pos of centre of player 1, and player_1_p is the y pos of the centre of player 1)
-        else if (aabb_vs_aabb(ball_p_x, ball_p_y, -80, player_2_p)) {
-            ball_p_x = -80 + player_half_size_x + ball_half_size; // set the ball position to the limit ( boundary i.e touching the player ) 
-            ball_dp_x *= -1; // invert x axis velocity to bounce back from the player 
-            ball_dp_y = player_2_dp * 0.75f; // to give the ball some y axis velocity based on the player's velocity . ( .75 for scaling ) 
-        }
+        // ------------------------------------------------------------ Drawing ----------------------------------------------------------------
+        draw_number(player_2_score, -10, 40, 1.f, 0xbbffbb);
+        draw_number(player_1_score, 10, 40, 1.f, 0xbbffbb);
+
+        draw_rect(ball_p_x, ball_p_y, ball_half_size, ball_half_size, 0xffffff); // ball 
+        draw_rect(80, player_1_p, 2.5, 12, 0xff0000); // player 1
+        draw_rect(-80, player_2_p, 2.5, 12, 0xff0000); // player 2 
 
 
-        // COLLISION # 3 : collision with arena boundaries 
-        if (ball_p_y + ball_half_size > arena_half_size_y) { // collided with top boundary 
-            ball_p_y = arena_half_size_y - ball_half_size;
-            ball_dp_y *= -1; // invert vertical velocity for reflection effect
-        }
-        else if (ball_p_y - ball_half_size < -arena_half_size_y) { // collided with bottom boundary 
-            ball_p_y = -arena_half_size_y + ball_half_size;
-            ball_dp_y *= -1;
-        }
-        else if (ball_p_x + ball_half_size > arena_half_size_x) { // collided with right boundary 
-            ball_p_x = 0;
-            ball_p_y = 0;
-            ball_dp_x *= -1;
-            ball_dp_y = 0;
-            player_2_score++;
-        }
-        else if (ball_p_x - ball_half_size < -arena_half_size_x) { // collided with left boundary 
-            ball_p_x = 0;
-            ball_p_y = 0;
-            ball_dp_x *= -1;
-            ball_dp_y = 0;
-            player_1_score++;
-
-        }
+    }
+else {
+    if (pressed(BUTTON_LEFT) || pressed(BUTTON_RIGHT)) {
+        hot_button = !hot_button;
     }
 
+    if (pressed(BUTTON_ENTER)) {
+        current_gamemode = GM_GAMEPLAY;
+        enemy_is_ai = hot_button ? 0 : 1;
+    }
+    if (hot_button == 0) {
+        draw_text("SINGLE PLAYER", -80, -10, 1, 0xff0000);
+        draw_text("MULTIPLAYER", 20, -10, 1, 0xaaaaaa);
 
-    // ------------------------------------------------------------ Drawing ----------------------------------------------------------------
-    draw_number(player_2_score, -10, 40, 1.f, 0xbbffbb);
-    draw_number(player_1_score, 10, 40, 1.f, 0xbbffbb);
+    }
+    else {
+        draw_text("SINGLE PLAYER", -80, -10, 1, 0xaaaaaa);
+        draw_text("MULTIPLAYER", 20, -10, 1, 0xff0000);
+    }
 
-    draw_rect(ball_p_x, ball_p_y, ball_half_size, ball_half_size, 0xffffff); // ball 
-    draw_rect(80, player_1_p, 2.5, 12, 0xff0000); // player 1
-    draw_rect(-80, player_2_p, 2.5 , 12, 0xff0000); // player 2 
+    draw_text("PONG", -20, 40, 2, 0xffffff);
+    //draw_text("WATCH THE STEP BY STEP TUTORIAL ON", -73, 22, .75, 0xffffff);
+    //draw_text("YOUTUBE.COM/DANZAIDAN", -73, 15, 1.22, 0xffffff);
 
-
-
+    
+}
 };

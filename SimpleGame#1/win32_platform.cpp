@@ -55,23 +55,27 @@ LRESULT CALLBACK window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     return result;
 }
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine, int       nShowCmd) {
+
+    ShowCursor(FALSE);
+
 	// create a window class
 	WNDCLASS window_class = {};
 	window_class.style = CS_HREDRAW | CS_VREDRAW;
-	window_class.lpszClassName = L"Game window class";
+	window_class.lpszClassName = L"Pong";
 	window_class.lpfnWndProc = window_callback;
 
 
 
 	// register the window 
 	 RegisterClass(&window_class);
+
+
+
 	// create window 
-
-
      HWND hwnd = CreateWindowEx(
          0,                              // Optional window styles.
-         L"Game window class",           // Window class
-         L"Learn to Program Windows",    // Window text
+         window_class.lpszClassName,     // Window class
+         L"Pong",                        // Window text
          WS_OVERLAPPEDWINDOW  | WS_VISIBLE ,            // Window style
 
          // Size and position
@@ -84,6 +88,14 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR     lpCmdLine, i
      if (hwnd == NULL)
      {
          return 0;
+     }
+     {
+         //fullscreen 
+         SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_OVERLAPPEDWINDOW );
+         MONITORINFO mi = { sizeof(mi) };
+         GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi);
+         SetWindowPos(hwnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
      }
      HDC hdc = GetDC(hwnd);
 
@@ -146,6 +158,9 @@ input.buttons[b].is_down = is_down;\
                         process_button(BUTTON_DOWN, VK_DOWN);
                         process_button(BUTTON_W, 'W');
                         process_button(BUTTON_S, 'S');
+                        process_button(BUTTON_LEFT, VK_LEFT);
+                        process_button(BUTTON_RIGHT, VK_RIGHT);
+                        process_button(BUTTON_ENTER, VK_RETURN);
                     }
 
                 }break;
